@@ -1,11 +1,19 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { NavBar } from "@/components/layout/nav-bar";
 import { CurrentUserProvider } from "@/components/providers/current-user-provider";
 import { getCurrentProfile } from "@/lib/data/profile";
 
-export default async function MainLayout({ children }: { children: ReactNode }) {
+export default function MainLayout({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<main className="mx-auto w-full max-w-[640px] px-4 py-6">불러오는 중...</main>}>
+      <AuthenticatedLayout>{children}</AuthenticatedLayout>
+    </Suspense>
+  );
+}
+
+async function AuthenticatedLayout({ children }: { children: ReactNode }) {
   await connection();
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
